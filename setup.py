@@ -35,6 +35,7 @@ setup(
     ],
     package_dir={'ipfe':
                  'ipfe'},
+    package_data={'ipfe':['data/*']},
     include_package_data=True,
     install_requires=requirements,
     license="BSD",
