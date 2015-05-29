@@ -1,6 +1,6 @@
 import numpy as np
 import skimage as si
-import util
+import ipfe.util
 
 
 def planarity(normals):
@@ -193,11 +193,11 @@ def pixel_angle_to_plane(image, plane=[0, 0, 1], size=3):
         for c in range((size - 1), cols - (size - 1)):
             box = image[r - (size - 1):r + (size - 1), c - (size - 1):
                         c + (size - 1)]
-            normal = np.array(util.vector.fit_plane_SVD(box))
+            normal = np.array(ipfe.util.vector.fit_plane_SVD(box))
             normals[r, c, 0] = normal[0]
             normals[r, c, 1] = normal[1]
             normals[r, c, 2] = normal[2]
-            angle_to_plane[r, c] = util.vector.angle(normal, plane)
+            angle_to_plane[r, c] = ipfe.util.vector.angle(normal, plane)
     return angle_to_plane, normals
 
 
