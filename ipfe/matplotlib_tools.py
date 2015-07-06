@@ -73,7 +73,7 @@ def show_images(images,titles=None):
         plt.imshow(image)
         a.set_title(title)
         n += 1
-    fig.set_size_inches(np.array(fig.get_size_inches()) * n_ims)
+    #fig.set_size_inches(np.array(fig.get_size_inches()) * n_ims)
     plt.show()
 
 

@@ -34,7 +34,7 @@ def rank(square, width, height):
       vertical_score)
 
 
-def find_squares(image):
+def find_rectangles(image):
     # OpenCV follows BGR order, while the API follows RGB order.  Since using
     # OpenCV methods, function, we need to flip the colors dimension from
     # BGR to RGB (using only NumPy indexing)
@@ -60,11 +60,11 @@ def find_squares(image):
       for thrs in xrange(0, 255, 26):
         if thrs == 0:
           edges = cv2.Canny(oversized, threshold1 = 0, threshold2 = 50, apertureSize = 3)
-          next = cv2.dilate(src = edges, kernel = kernel, anchor = (-1,-1))
+          next_ = cv2.dilate(src = edges, kernel = kernel, anchor = (-1,-1))
         else:
-          retval, next = cv2.threshold(gray, thrs, 255, cv2.THRESH_BINARY)
+          retval, next_ = cv2.threshold(gray, thrs, 255, cv2.THRESH_BINARY)
 
-        contours, hierarchy = cv2.findContours(next, mode = cv2.RETR_LIST, method = cv2.CHAIN_APPROX_SIMPLE)
+        image_, contours, hierarchy = cv2.findContours(next_, mode = cv2.RETR_LIST, method = cv2.CHAIN_APPROX_SIMPLE)
         # how are the contours sorted? outwards to inwards? would be interesting to do a PVE
         # sort of thing where the contours within a contour (and maybe see an elbow plot of some sort)
         for cnt in contours:
@@ -81,7 +81,7 @@ def find_squares(image):
 
 
 
-def straighten_square(image, pts):
+def straighten_rect(image, pts):
     """
     Given a set of pts that describe a polygon determine the parameters
     needed to transform the polygon to a rectangle.

@@ -47,7 +47,7 @@ def local_max_region(image, response, threshold, shape):
             continue
         if region.area < 900: # or region.area > 2000:
             continue
-        patches.append(img_copy[minr:maxr,minc:maxc].copy())
+        patches.append([img_copy[minr:maxr,minc:maxc].copy(),((minr+maxr)/2,(minc+maxc)/2)])
         #centr = minr + (maxr-minr)/2
         #centc = minc + (maxc-minc)/2
     return patches
