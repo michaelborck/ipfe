@@ -43,7 +43,7 @@ def edge_based(image):
 
     si.io.imsave('edge.png', image)
     os.system('/opt/local/bin/convert edge.png edge.pgm')
-    os.system('/Users/michael/bin/edge_based_saliency_map -i edge.pgm \
+    os.system('/Users/michael/bin/salient_regions -i edge.pgm \
               -o overlay.pgm -m mask.pgm -s smedge.pgm ')
               #-o overlay.pgm -s smedge.pgm ')
     os.system('/opt/local/bin/convert -negate smedge.pgm sm.pgm')

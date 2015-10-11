@@ -9,7 +9,7 @@ import logging
 from scipy import misc
 
 # My libraries
-from ipfe.progressbar import ProgressBar
+from toolbox.progressbar import ProgressBar
 from ipfe.misc import pixels_in, toECEF
 
 
@@ -40,6 +40,7 @@ class Atmosphere():
         # The 'clouds' that make up the atmosphere (views of same cloud)
         self.image = np.zeros(shape=(width, height, 3), dtype='uint8')
         self.depth = np.zeros(shape=(width, height, 3), dtype='uint8')
+        self.locations = np.zeros(shape=(width, height, 3), dtype='float32')
         self.polydata = vtk.vtkPolyData()
 
     def __to_world(self, x, y, point, width=512, height=512):
@@ -88,6 +89,9 @@ class Atmosphere():
                 depth = 255 - int(np.floor(scaleFactor * 255.0))
                 self.depth[r][c] = (depth, depth, depth)
                 self.image[r][c] = (R,G,B)
+                self.locations[r][c] = (np.float32(locations['lat']),
+                                        np.float32(location['lon']),
+                                        np.float32(location['alt']))
 
                 # Update VTK information
                 if (zr < self.range_limit):  # don't add points to "far" away
@@ -117,6 +121,7 @@ class Atmosphere():
         colours.SetNumberOfComponents(3)
         colours.SetName("Colours")
         n = 0
+        #print "ROI: ", roi
         numpixels = pixels_in(roi)
         if numpixels == 0:  # Do we have any pixels?
             logging.warning("Unable to fetch cloud. No pixels selected")
@@ -133,7 +138,7 @@ class Atmosphere():
                           cells, colours, n)
             start = end
             progress.update_display(end)
-        if start < len(pixels):
+        if start <= len(pixels):
             locations = server.fetch_locations(pixels[start:len(pixels)])
             n = self.update(locations, pixels[start:len(pixels)],
                           image, vtkpts, cells, colours, n)

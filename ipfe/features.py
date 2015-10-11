@@ -1,6 +1,6 @@
 import numpy as np
-import vlfeat
-import fast9
+#import vlfeat
+#import fast9
 from scipy import ndimage
 import scipy.stats
 import warnings
@@ -11,49 +11,6 @@ from skimage.feature import local_binary_pattern, corner_harris
 from skimage.feature import corner_peaks, hog, daisy, canny
 from skimage.filters import gabor_filter
 from skimage.transform import resize
-
-
-def align_rgb(rgb, depth):
-    aligned = np.copy(rgb)
-    mask = depth == 0
-    aligned[mask] = 0
-    return aligned
-
-
-def rgChromaticity(rgb):
-    """
-    rg Chromaticity
-    http://en.wikipedia.org/wiki/Rg_chromaticity
-
-    Also know as normalised RGB as per paper:
-    Color-based object recognition, Theo Gevers and Arnold W.M. Smeulders,
-    Pattern Recognition,number 3, pages 453-464, volume 32, 1999.
-    """
-    rgChrom = img_as_float(rgb)
-    r = rgb[:, :, 1] + 0.00000000001
-    g = rgb[:, :, 0] + 0.00000000001
-    b = rgb[:, :, 2] + 0.00000000001
-    divisor = r + g + b
-    rgChrom[:, :, 1] = r / divisor
-    rgChrom[:, :, 0] = g / divisor
-    rgChrom[:, :, 2] = b / divisor
-    return rgChrom
-
-
-def linear_normalization(arr):
-    """
-    Linear normalization
-    http://en.wikipedia.org/wiki/Normalization_%28image_processing%29
-    """
-    arr = arr.astype('float')
-    # Do not touch the alpha channel
-    for i in range(3):
-        minval = arr[..., i].min()
-        maxval = arr[..., i].max()
-        if minval != maxval:
-            arr[..., i] -= minval
-            arr[..., i] *= (255.0 / (maxval - minval))
-    return arr
 
 
 def edge_orientation_histogram(image):
@@ -226,7 +183,7 @@ def patch_LBP(image, size=None):
     return fd, lbp
 
 
-def patch_SIFT(image, size=None):
+#def patch_SIFT(image, size=None):
     """
     Extract SIFT feature descriptor for the given image.
 
@@ -245,21 +202,21 @@ def patch_SIFT(image, size=None):
     desrc : ndarray
         SIFT descriptor
     """
-    img = img_as_int(rgb2gray(image))
-    if size is not None:
-        img = resize(img, size)
-    if not isinstance(image, basestring):
-        io.imsave("/tmp/image.pgm", img)
-        image = "/tmp/image.pgm"
-    vlfeat.process_image(image, '/tmp/tmp.sift')
-    locs, desc = vlfeat.read_features_from_file('/tmp/tmp.sift')
-    density = 0.0
-    if locs is not None:
-        density = len(locs) / float(size)
-    return density, locs, desc
+    #img = img_as_int(rgb2gray(image))
+    #if size is not None:
+        #img = resize(img, size)
+    #if not isinstance(image, basestring):
+        #io.imsave("/tmp/image.pgm", img)
+        #image = "/tmp/image.pgm"
+    #vlfeat.process_image(image, '/tmp/tmp.sift')
+    #locs, desc = vlfeat.read_features_from_file('/tmp/tmp.sift')
+    #density = 0.0
+    #if locs is not None:
+        #density = len(locs) / float(size)
+    #return density, locs, desc
 
 
-def patch_FAST(image, size=None):
+#def patch_FAST(image, size=None):
     """
     Extract FAST keypoints and density measure.
 
@@ -276,10 +233,10 @@ def patch_FAST(image, size=None):
     density : float
         proportion of FAST keypoint in image
     """
-    if size is not None:
-        image = resize(image, size)
-    (corners, scores) = fast9.detect(image, 20)
-    return corners, len(corners) / float(image.shape[0] * image.shape[1])
+    #if size is not None:
+        #image = resize(image, size)
+    #(corners, scores) = fast9.detect(image, 20)
+    #return corners, len(corners) / float(image.shape[0] * image.shape[1])
 
 
 def patch_Harris(image, size=None):
