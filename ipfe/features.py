@@ -1,16 +1,49 @@
 import numpy as np
-#import vlfeat
-#import fast9
+import fast.fast9 as fast9
+import mahatos as mh
 from scipy import ndimage
 import scipy.stats
 import warnings
 from skimage import img_as_float, img_as_int
-from skimage.color import rgb2gray    # , rgb2rgbcie, rgb2xyz
+from skimage.color import rgb2gray
 from skimage import io
 from skimage.feature import local_binary_pattern, corner_harris
 from skimage.feature import corner_peaks, hog, daisy, canny
-from skimage.filters import gabor_filter
+from skimage.filters import gabor_filter, sobel
 from skimage.transform import resize
+import mahatos as mh
+
+
+def hist_intersection(histA, histB):
+    """ Calcuates the intersection of two histograms.
+
+    If two normalised histograms are the same then the sum of the intersection
+    will be one.
+
+    Assumes histograms are normalised.
+
+    Parameters
+    ----------
+    histA: 1D numpy array
+        normalised array where the sum of elements equals 1
+    histB: 1D numpy array
+        normalised array where the sum of elements equals 1
+
+    Returns
+    -------
+    similarity: number
+        Range 0-1. With similar -> 1
+    """
+    if histA == None or histB == None:
+        return 0
+    if len(histA) !=  len(histB): # Histogram same size
+        return 0
+    if histA.ndim != 1: # Must be single dimension histogrsm
+        return 0
+    return np.sum([min(a,b) for (a,b) in zip(histA,histB)])
+
+
+
 
 
 def edge_orientation_histogram(image):
@@ -183,7 +216,7 @@ def patch_LBP(image, size=None):
     return fd, lbp
 
 
-#def patch_SIFT(image, size=None):
+def patch_SURF(image, size=None):
     """
     Extract SIFT feature descriptor for the given image.
 
@@ -202,21 +235,13 @@ def patch_LBP(image, size=None):
     desrc : ndarray
         SIFT descriptor
     """
-    #img = img_as_int(rgb2gray(image))
-    #if size is not None:
-        #img = resize(img, size)
-    #if not isinstance(image, basestring):
-        #io.imsave("/tmp/image.pgm", img)
-        #image = "/tmp/image.pgm"
-    #vlfeat.process_image(image, '/tmp/tmp.sift')
-    #locs, desc = vlfeat.read_features_from_file('/tmp/tmp.sift')
-    #density = 0.0
-    #if locs is not None:
-        #density = len(locs) / float(size)
-    #return density, locs, desc
+    img = img_as_int(rgb2gray(image))
+    if size is not None:
+        img = resize(img, size)
+    return mh.features.surf.dense(image,spacing=16)
 
 
-#def patch_FAST(image, size=None):
+def patch_FAST(image, size=None):
     """
     Extract FAST keypoints and density measure.
 
@@ -233,10 +258,10 @@ def patch_LBP(image, size=None):
     density : float
         proportion of FAST keypoint in image
     """
-    #if size is not None:
-        #image = resize(image, size)
-    #(corners, scores) = fast9.detect(image, 20)
-    #return corners, len(corners) / float(image.shape[0] * image.shape[1])
+    if size is not None:
+        image = resize(image, size)
+    (corners, scores) = fast9.detect(image, 20)
+    return corners, len(corners) / float(image.shape[0] * image.shape[1])
 
 
 def patch_Harris(image, size=None):
@@ -304,6 +329,64 @@ def patch_Gabor(image, angle=0, size=None, feature=False):
         return real, mean, std
     else:
         return real
+
+
+def edginess_sobel(image):
+    '''Measure the "edginess" of an image
+
+    image should be a 2d numpy array (an image)
+
+    Returns a floating point value which is higher the "edgier" the image is.
+    '''
+    edges = sobel(rgb2gray(image))
+    edges = edges.ravel()
+    return np.sqrt(np.dot(edges, edges))
+
+
+def texture_haralick(image):
+    '''Compute features for an image
+
+    Parameters
+    ----------
+    im : ndarray
+
+    Returns
+    -------
+    fs : ndarray
+        1-D array of features
+    '''
+    im = im.astype(np.uint8)
+    return np.mean(mh.features.haralick(image),0)
+
+
+def chist(im):
+    '''Compute color histogram of input image
+    Parameters
+    ----------
+    im : ndarray
+        should be an RGB image
+    Returns
+    -------
+    c : ndarray
+        1-D array of histogram values
+    '''
+
+    # Downsample pixel values:
+    im = im // 64
+
+    # We can also implement the following by using np.histogramdd
+    # im = im.reshape((-1,3))
+    # bins = [np.arange(5), np.arange(5), np.arange(5)]
+    # hist = np.histogramdd(im, bins=bins)[0]
+    # hist = hist.ravel()
+
+    # Separate RGB channels:
+    r,g,b = im.transpose((2,0,1))
+
+    pixels = 1 * r + 4 * g + 16 * b
+    hist = np.bincount(pixels.ravel(), minlength=64)
+    hist = hist.astype(float)
+    return np.log1p(hist)
 
 
 def edge_density(image, sigma=20, size=None):

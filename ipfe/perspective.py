@@ -80,7 +80,6 @@ def find_rectangles(image):
     return sorted_squares
 
 
-
 def straighten_rect(image, pts):
     """
     Given a set of pts that describe a polygon determine the parameters
@@ -146,26 +145,3 @@ def straighten_rect(image, pts):
     # Flip BGR to RGB (using only NumPy indexing)
     warp = warp_img[:,:,::-1]
     return M, maxWidth, maxHeight, warp
-
-
-if __name__ == '__main__':
-    from matplotlib import pyplot as plt
-    import sys
-    # Loading image
-    if len(sys.argv) == 2:
-        filename = sys.argv[1] # for drawing purposes
-    else:
-        print "No input image given! \n"
-
-    img = io.imread(filename,)
-    sorted_squares = find_squares(img)
-    M, maxWidth, maxheight, warp = straighten_square(img, sorted_squares[0])
-
-    fig, ax = plt.subplots(nrows=1, ncols=2)
-    ax[0].imshow(img)
-    ax[0].set_xticks([])
-    ax[0].set_yticks([])
-    ax[1].imshow(warp)
-    ax[1].set_xticks([])
-    ax[1].set_yticks([])
-    plt.show()
